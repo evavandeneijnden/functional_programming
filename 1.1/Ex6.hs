@@ -2,7 +2,7 @@ mylength :: [a] -> Int
 mylength list   | null list = 0
                 | otherwise = mylength (tail list) + 1
 
-mysum :: [Double] -> Double
+mysum :: Num a => [a] -> a
 mysum list      | mylength list == 0 = 0
                 | otherwise = mysum (tail list) + head list
 
@@ -22,14 +22,14 @@ myelem (x:xs) el                | x == el = True
 
 myconcat :: [[a]] -> [a]
 myconcat [] = []
-myconcat (x:xs) = x ++ myconcat xs
+myconcat (xs:xss) = xs ++ myconcat xss
 
-mymaximum :: Ord a => [a] -> a
+mymaximum :: (Num a,Ord a) => [a] -> a
 mymaximum (x:xs)                | mylength xs == 0 = x
                                 | x < head xs = mymaximum xs
                                 | x >= head xs = mymaximum ([x] ++ tail xs)
 
-myzip :: [a] -> [a] -> [(a,a)]
+myzip :: [a] -> [b] -> [(a,b)]
 myzip [] list2 = []
 myzip list1 [] = []
 myzip (x1:xs1) (x2:xs2) = [(x1,x2)] ++ (myzip xs1 xs2)
