@@ -7,3 +7,7 @@ myfilter func (x:xs)    | length xs == 0 && func x == True = [x]
 myZipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
 myZipWith func (x:xs) (y:ys)                    | length xs == 0 || length ys == 0 = [func x y]
                                                 | otherwise = func x y : myZipWith func xs ys
+
+myfoldl :: (b -> a -> b) -> b -> [a] -> b
+myfoldl function base [] = base
+myfoldl function base (x:xs) = (myfoldl function (function base x) xs)
