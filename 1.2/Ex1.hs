@@ -10,7 +10,7 @@ myZipWith func (x:xs) (y:ys)                    | length xs == 0 || length ys ==
 
 myfoldl :: (b -> a -> b) -> b -> [a] -> b
 myfoldl function base [] = base
-myfoldl function base (x:xs) = (myfoldl function (function base x) xs)
+myfoldl function base (x:xs) = myfoldl function (function base x) xs
 
 myfoldr :: (a -> b -> b) -> b -> [a] -> b
 myfoldr function base [] = base
