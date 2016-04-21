@@ -4,12 +4,11 @@ rowlengthequal (xs:xss) | xss == [] = True
                         | otherwise = False
 
 rowtotals :: (Eq a, Num a) => [[a]] -> [a]
-rowtotals (xs:xss)  | xss == [] = [(sum xs)]
-                    | otherwise = (sum xs) : (rowtotals xss)
+rowtotals = map sum
 
 transpose :: [[a]] -> [[a]]
 transpose ([]:_) = []
 transpose matrix = (map head matrix): transpose (map tail matrix)
 
 columntotals :: (Eq a,Num a) => [[a]] -> [a]
-columntotals matrix = rowtotals (transpose matrix)
+columntotals = rowtotals . transpose
