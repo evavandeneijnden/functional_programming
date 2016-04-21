@@ -9,9 +9,9 @@ myZipWith func (x:xs) (y:ys)                    | length xs == 0 || length ys ==
                                                 | otherwise = func x y : myZipWith func xs ys
 
 myfoldl :: (b -> a -> b) -> b -> [a] -> b
-myfoldl function base [] = base
-myfoldl function base (x:xs) = myfoldl function (function base x) xs
+myfoldl function accumulator [] = base
+myfoldl function accumulator (x:xs) = myfoldl function (function accumulator x) xs
 
 myfoldr :: (a -> b -> b) -> b -> [a] -> b
-myfoldr function base [] = base
-myfoldr function base (x:xs) = function x (foldr function base xs)
+myfoldr function accumulator [] = base
+myfoldr function accumulator (x:xs) = function x (foldr function accumulator xs)
