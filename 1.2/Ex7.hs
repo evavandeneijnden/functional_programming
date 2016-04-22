@@ -39,10 +39,17 @@ merge list1 [] = list1
 merge (x:xs) (y:ys) | (x < y) = (x : (merge xs (y:ys)))
                     | otherwise = (y : (merge (x:xs) ys))
 
-
+-- Deze werkt nog niet!
 mergesort :: Ord a => [a] -> [a]
 mergesort [] = []
 mergesort [x] = [x]
 mergesort list = merge (mergesort list1) (mergesort list2)
                 where
-                    (list1, list2) = splitAt (round((length list) `div` 2)) list
+                    splitting_point = round (listlength / 2)
+                    listlength = length list
+                    (list1, list2) = splitAt splitting_point list
+
+qsort :: Ord a => [a] -> [a]
+qsort [] = []
+qsort [x] = [x]
+qsort (x:xs) = qsort([x1 | x1 <- xs, x1 < x]) ++ [x] ++ qsort([x2 | x2 <- xs, x2 >= x])
