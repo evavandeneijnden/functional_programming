@@ -45,7 +45,7 @@ mergesort [] = []
 mergesort [x] = [x]
 mergesort list = merge (mergesort list1) (mergesort list2)
                 where
-                    splitting_point = round (listlength / 2)
+                    splitting_point = round (fromIntegral(listlength) / fromIntegral(2))
                     listlength = length list
                     (list1, list2) = splitAt splitting_point list
 

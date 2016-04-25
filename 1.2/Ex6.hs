@@ -5,6 +5,8 @@ sublist xs [] = True
 sublist [] ys = False
 sublist (x:xs) (y:ys)   | x /= y = sublist xs (y:ys)
                         | x == y = sublistHelper xs ys
+
+sublistHelper :: Eq a => [a] -> [a] -> Bool
 sublistHelper [] [] = True
 sublistHelper xs [] = True
 sublistHelper [] ys = False
