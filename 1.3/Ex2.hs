@@ -1,10 +1,5 @@
 import FPPrac.Trees
-
-data Tree1a = Leaf1a Int
-            | Node1a Int Tree1a Tree1a
-
-data Tree1b = Leaf1b (Int, Int)
-            | Node1b (Int, Int) Tree1b Tree1b
+import Ex1
 
 treeAdd :: Tree1a -> Int -> Tree1a
 treeAdd (Leaf1a i) x = Leaf1a (i+x)
