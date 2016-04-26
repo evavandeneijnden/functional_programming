@@ -3,11 +3,8 @@ import Data.List
 bsort_pass :: Ord a => [a] -> [a]
 bsort_pass [] = []
 bsort_pass [x] = [x]
-bsort_pass [x,y]      | x > y = [y,x]
-                      | otherwise = [x,y]
 bsort_pass (x:y:ys)   | x > y = y : bsort_pass (x:ys)
                       | otherwise = x : bsort_pass (y:ys)
-
 
 bsort :: Ord a => [a] -> [a]
 bsort [] = []
@@ -39,7 +36,6 @@ merge list1 [] = list1
 merge (x:xs) (y:ys) | (x < y) = (x : (merge xs (y:ys)))
                     | otherwise = (y : (merge (x:xs) ys))
 
--- Deze werkt nog niet!
 mergesort :: Ord a => [a] -> [a]
 mergesort [] = []
 mergesort [x] = [x]
