@@ -36,13 +36,31 @@ data Nonterminal = Expression
                   | Operand
                   | Number
 
-parse :: Nonterminal -> [Token] -> (ParseTree, String)
+isNumToken :: Token -> Bool
+isNumToken (Num Int) = True
+isNumToken _         = False
+
+isOpToken :: Token -> Bool
+isOpToken (Num Int) = True
+isOpToken _         = False
+
+parse :: Nonterminal -> [Token] -> (ParseTree, [Token])
+parse Expression (x:xs) = x == LeftBracket = l
+
+
+
+
+
+parse :: Nonterminal -> [Token] -> (ParseTree, [Token])
 parse Expression (x:xs) = x == LeftBracket  = ((BinNode (head xs) t1 t2), r2)
-                        | x == (Num y)      = parse Number (x:xs)
+                        | (isNumToken x)    = parse Number (x:xs)
+                        | (isOpToken x)     = parse Operand (x:xs)
                         | otherwise         = (error "parse error")
                         where
                           (t1, r1)          = parse Expression (init xs)
                           (t2, r2)          = parse Expression r1
 
-parse Number (x:xs) = x == (Num y)          = ((BinLeaf y), xs)
+parse Number (x:xs) = (isNumToken x)        = ((BinLeaf x), xs)
                     | otherwise             = (error "parse error")
+
+parse Operand (x:xs) = (isOpToken x) =      ((BinNode x))
