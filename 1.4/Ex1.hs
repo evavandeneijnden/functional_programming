@@ -1,4 +1,4 @@
-module BinTree where
+module Ex1 where
   import FPPrac.Trees
 
   data BinTree a b  = BinLeaf b

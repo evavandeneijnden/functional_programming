@@ -18,6 +18,6 @@ subTree :: Tree1a -> [Char] -> Tree1a
 subTree t [] = t
 subTree (Leaf1a x) path = error "Path doesn't lead to a node"
 subTree (Node1a x t1 t2) (p:path)
-                            | p == 'l' = t1
-                            | p == 'r' = t2
+                            | p == 'l' = subTree t1 path
+                            | p == 'r' = subTree t2 path
                             | otherwise = error "unknown character in path"

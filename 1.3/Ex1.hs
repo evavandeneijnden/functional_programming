@@ -9,7 +9,7 @@ module Ex1 where
             pp1a (Leaf1a i) = RoseNode (show i) []
             pp1a (Node1a i t1 t2) = RoseNode (show i) [pp1a t1, pp1a t2]
 
-            t1a = Node1a 36 (Leaf1a 35) (Leaf1a 34)
+            t1a = Node1a 36 (Node1a 35 (Leaf1a 33) (Leaf1a 32)) (Node1a 31 (Leaf1a 30) (Leaf1a 29))
 
             data Tree1b = Leaf1b (Int, Int)
                         | Node1b (Int, Int) Tree1b Tree1b
