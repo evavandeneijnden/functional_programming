@@ -1,4 +1,6 @@
-module Ex3 where
+module Ex3
+  ( Token(..), Op(..)  )
+  where
   import Data.Char
 
   data State = Start | State1 | State2 | Final | Final1 | Final2 | Final3 | Final4 | Error | RealError
@@ -62,17 +64,16 @@ module Ex3 where
 
 
   opStrToToken :: String -> Token
-  opStrToToken "+" = Operator Plus
-  opStrToToken "-" = Operator Min
-  opStrToken "*" = Multiply
-  opStrToken "++" = PlusPlus
-  opStrToken "+=" = PlusIs
-  opStrToken "--" = MinMin
-  opStrToken "-=" = MinIs
-  opStrToken ">" = GreaterThan
-  opStrToken ">=" = GreaterThanEquals
-  opStrToken "<" = SmallerThan
-  opStrToken "<=" = SmallerThanEquals
+  opStrToToken "+"    = Operator Plus
+  opStrToToken "-"    = Operator Min
+  opStrToToken "*"    = Operator Multiply
+  opStrToToken "++"   = Operator PlusPlus
+  opStrToToken "+="   = Operator PlusIs
+  opStrToToken "-="   = Operator MinIs
+  opStrToToken ">"    = Operator GreaterThan
+  opStrToToken ">="   = Operator GreaterThanEquals
+  opStrToToken "<"    = Operator SmallerThan
+  opStrToToken "<="   = Operator SmallerThanEquals
 
 
   numStrToToken :: String -> Token

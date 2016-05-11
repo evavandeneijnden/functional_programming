@@ -1,14 +1,14 @@
 module Ex4 where
+            import Ex1
             import Ex2
             import Ex3
 
-            type ParseTreeToken = BinTree Operator (Either Num Identifier)
+            type ParseTreeTokens = BinTree Token Token
 
-            parseToken :: [Token] -> (ParseTreeToken, [Token])
-            parseToken (x:xs)| x == LeftBracket      = ((BinNode operator l r), rest2)
-                        | x == Num _            = (BinLeaf (Left x), xs)
-                        | x == Identifier _     = (BinLeaf (Right x), xs)
-                        | otherwise             = error "kaput"
-                        where
-                            (l, (operator:rest1)) = parseToken xs
-                            (r, (')':rest2)) = parseToken rest1
+            parseToken :: [Token] -> (ParseTreeTokens, [Token])
+            parseToken (x:xs)       | x == LeftBracket                  = ((BinNode operator l r), rest2)
+                                    | x == Num _ || x == Identifier _   = (BinLeaf x, xs)
+                                    | otherwise                         = error "kaput"
+                                    where
+                                                (l, (operator:rest1)) = parseToken xs
+                                                (r, (LeftBracket:rest2)) = parseToken rest1
