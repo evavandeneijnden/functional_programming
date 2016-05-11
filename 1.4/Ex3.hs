@@ -61,17 +61,16 @@ data Op = Plus | Min | Multiply | PlusPlus | PlusIs | MinMin | MinIs | GreaterTh
 
 
 opStrToToken :: String -> Token
-opStrToToken "+" = Operator Plus
-opStrToToken "-" = Operator Min
-opStrToken "*" = Multiply
-opStrToken "++" = PlusPlus
-opStrToken "+=" = PlusIs
-opStrToken "--" = MinMin
-opStrToken "-=" = MinIs
-opStrToken ">" = GreaterThan
-opStrToken ">=" = GreaterThanEquals
-opStrToken "<" = SmallerThan
-opStrToken "<=" = SmallerThanEquals
+opStrToToken "+"  = Operator Plus
+opStrToToken "-"  = Operator Min
+opStrToken "*"    = Operator Multiply
+opStrToken "++"   = Operator PlusPlus
+opStrToken "+="   = Operator PlusIs
+opStrToken "-="   = Operator MinIs
+opStrToken ">"    = Operator GreaterThan
+opStrToken ">="   = Operator GreaterThanEquals
+opStrToken "<"    = Operator SmallerThan
+opStrToken "<="   = Operator SmallerThanEquals
 
 
 numStrToToken :: String -> Token
