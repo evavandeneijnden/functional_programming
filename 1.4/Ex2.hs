@@ -6,7 +6,7 @@ module Ex2 where
             type ParseTree = BinTree Char (Either Int Char)
 
             parse :: String -> (ParseTree, String)
-            parse (x:xs)| x == '('            = ((BinNode operator l r), rest2)
+            parse (x:xs)| x == '('      = ((BinNode operator l r), rest2)
                         |   isDigit x   = (BinLeaf (Left $ read [x]), xs)
                         |   isLetter x  = (BinLeaf (Right x), xs)
                         |   otherwise   = error "kaput"
