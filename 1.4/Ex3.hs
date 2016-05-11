@@ -81,6 +81,10 @@ numStrToToken i = Num (read i)
 identifierToToken :: String -> Token
 identifierToToken str = Identifier str
 
+bracketStrToToken :: String -> Token
+bracketStrToToken "(" = LeftBracket
+bracketStrToToken ")" = RightBracket
+
 
 addToken :: String -> State -> String -> (Char -> State -> State) -> (String, String)
 addToken (x:xs) currentState partialToken fsa
@@ -113,3 +117,5 @@ chooseFsa :: Char -> (FSA, String -> Token)
 chooseFsa x | (isDigit x)                 = (fsaNumbers, numStrToToken)
             | (isAlpha x)                 = (fsaIdentifiers, identifierToToken)
             | (elem x operatorCharacters) = (fsaOperators, opStrToToken)
+            | (x == '(' || x == ')')      = (fsaWhiteSpace, bracketStrToToken)
+            | otherwise = error "Invalid input"
