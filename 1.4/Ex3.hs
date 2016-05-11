@@ -1,5 +1,5 @@
 module Ex3
-  ( Token(..), Op(..)  )
+  ( Token(..), Op(..), tokenizer'  )
   where
   import Data.Char
 
@@ -29,14 +29,10 @@ module Ex3
   fsaOperators :: Char -> State -> State
   fsaOperators character state = case state of
                               Start   | character == '*' -> Final1
-                                      | character == '+' -> Final2
-                                      | character == '-' -> Final3
+                                      | character == '+' -> Final1
+                                      | character == '-' -> Final1
                                       | (character == '>' || character == '<') -> Final4
                               Final1  -> Error
-                              Final2  | (character == '+' || character == '=') -> Final1
-                                      | otherwise -> Error
-                              Final3  | (character == '=') -> Final1
-                                      | otherwise -> Error
                               Final4  | character == '=' -> Final1
                                       | otherwise -> Error
 
@@ -67,9 +63,6 @@ module Ex3
   opStrToToken "+"    = Operator Plus
   opStrToToken "-"    = Operator Min
   opStrToToken "*"    = Operator Multiply
-  opStrToToken "++"   = Operator PlusPlus
-  opStrToToken "+="   = Operator PlusIs
-  opStrToToken "-="   = Operator MinIs
   opStrToToken ">"    = Operator GreaterThan
   opStrToToken ">="   = Operator GreaterThanEquals
   opStrToToken "<"    = Operator SmallerThan
@@ -89,8 +82,9 @@ module Ex3
 
 
   addToken :: String -> State -> String -> (Char -> State -> State) -> (String, String)
+  addToken [] _ partialToken _ = (partialToken,"")
   addToken (x:xs) currentState partialToken fsa
-    | nextState == Error = (partialToken, x:xs)
+    | nextState == Error = (partialToken, (x:xs))
     | nextState == RealError = error "Parse error!"
     | otherwise          = addToken xs nextState (partialToken ++ [x]) fsa
       where
@@ -119,5 +113,5 @@ module Ex3
   chooseFsa x | (isDigit x)                 = (fsaNumbers, numStrToToken)
               | (isAlpha x)                 = (fsaIdentifiers, identifierToToken)
               | (elem x operatorCharacters) = (fsaOperators, opStrToToken)
-              | (x == '(' || x == ')')      = (fsaWhiteSpace, bracketStrToToken)
+              | (x == '(' || x == ')')      = (fsaBrackets, bracketStrToToken)
               | otherwise = error "Invalid input"
