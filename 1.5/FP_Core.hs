@@ -1,5 +1,5 @@
 module FP_Core where
-
+  import FPPrac.Trees
 {-
 Extension of CoreIntro.hs:
 - instructions as program *in* the processor,
@@ -14,11 +14,15 @@ Extension of CoreIntro.hs:
 
 type Stack  = [Int]
 
+type Heap = [Int]
+
 data Op     = Add | Mul | Sub
             deriving Show
 
-data Instr  = Push Int
+data Instr  = PushConst Int
             | Calc Op
+            | PushAddr Instr
+            | Store Int
             | EndProg
             deriving Show
 
@@ -27,6 +31,14 @@ data Tick = Tick
 data Expr = Const Int                   -- for constants
           | BinExpr Op Expr Expr        -- for ``binary expressions''
 
+data Statement = Assign String Expr
+
+data LookupTuples = [(String, Int)]
+
+lookup :: String -> LookupTuples -> Int
+lookup varname [] = error "Unknown variable"
+lookup varname (x:xs) | fst x == varname = snd x
+                      | lookup varname xs
 -- ========================================================================
 -- Processor functions
 
@@ -39,17 +51,46 @@ alu op = case op of
                 Sub -> (-)
 
 
-core :: [Instr] -> (Int,Int,Stack) -> Tick -> (Int,Int,Stack)
+core :: [Instr] -> (Int,Int,Heap,Stack) -> Tick -> (Int,Int,Heap,Stack)
 
-core instrs (pc,sp,stack) tick =  case instrs!!pc of
+core instrs (pc,sp,heap,stack) tick =  case instrs!!pc of
 
-        Push n   -> (pc+1, sp+1 , stack <~ (sp,n))
+        PushConst n   -> (pc+1, sp+1 , heap, stack <~ (sp,n))
 
-        Calc op  -> (pc+1, sp-1 , stack <~ (sp-2,v))
+        Calc op  -> (pc+1, sp-1 , heap, stack <~ (sp-2,v))
                  where
                    v = alu op (stack!!(sp-2)) (stack!!(sp-1))
 
-        EndProg  -> (-1, sp, stack)
+        PushAddr n -> (pc+1, sp+1, heap, stack <~ (sp, (heap !! n)))
+
+        Store n -> (pc+1, sp?, ys ++ [last stack] ++ zs, init stack)
+                where
+                  (ys,zs) = splitAt n heap
+
+        EndProg  -> (-1, sp, heap, stack)
+
+codeGen :: Expr -> [Instr]
+codeGen expr = instrGen expr ++ [EndProg]
+
+instrGen :: Expr -> [Instr]
+instrGen (Const x) = [Push x]
+instrGen (BinExpr op expr1 expr2) = (instrGen expr1) ++ (instrGen expr2) ++ [Calc op]
+
+-- ========================== Tree stuff ==================================
+
+data BinTree a b  = BinLeaf b
+                | BinNode a (BinTree a b) (BinTree a b)
+
+ppBinTree :: (Show a, Show b) => (BinTree a b) -> RoseTree
+ppBinTree (BinLeaf b) = RoseNode (show b) []
+ppBinTree (BinNode a t1 t2) = RoseNode (show a) [ppBinTree t1, ppBinTree t2]
+
+type ExprTree = BinTree Op Int
+
+exprToExprTree :: Expr -> ExprTree
+exprToExprTree (Const x) = BinLeaf x
+exprToExprTree (BinExpr op expr1 expr2) = BinNode op (exprToExprTree expr1) (exprToExprTree expr2)
+
 
 -- ========================================================================
 -- example Program for expression: (((2*10) + (3*(4+11))) * (12+5))
@@ -95,5 +136,3 @@ test       = putStr
            $ takeWhile (\(pc,_,_) -> pc /= -1)
 
            $ scanl (core prog) (0,0,emptyStack) clock
-
-
