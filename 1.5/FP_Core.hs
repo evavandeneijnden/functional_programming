@@ -21,7 +21,7 @@ data Op     = Add | Mul | Sub
 
 data Instr  = PushConst Int
             | Calc Op
-            | PushAddr Instr
+            | PushAddr Int
             | Store Int
             | EndProg
             deriving Show
@@ -29,16 +29,17 @@ data Instr  = PushConst Int
 data Tick = Tick
 
 data Expr = Const Int                   -- for constants
+          | Variable String
           | BinExpr Op Expr Expr        -- for ``binary expressions''
 
-data Statement = Assign String Expr
+data Statement = Assign Variable Expr
 
 data LookupTuples = [(String, Int)]
 
 lookup :: String -> LookupTuples -> Int
 lookup varname [] = error "Unknown variable"
 lookup varname (x:xs) | fst x == varname = snd x
-                      | lookup varname xs
+                      | otherwise = lookup varname xs
 -- ========================================================================
 -- Processor functions
 
@@ -76,6 +77,14 @@ instrGen :: Expr -> [Instr]
 instrGen (Const x) = [Push x]
 instrGen (BinExpr op expr1 expr2) = (instrGen expr1) ++ (instrGen expr2) ++ [Calc op]
 
+codeGen' :: Expr -> [Instr]
+codeGen' expr = instrGen' expr ++ [EndProg]
+
+instrGen' :: Expr -> [Instr]
+instrGen' (Const x) = [PushConst x]
+instrGen' (Variable x) = [PushAddr (lookup x lookuptable)]
+instrGen' (BinExpr op expr1 expr2) = (instrGen expr1) ++ (instrGen expr2) ++ [Calc op]
+
 -- ========================== Tree stuff ==================================
 
 data BinTree a b  = BinLeaf b
@@ -88,7 +97,8 @@ ppBinTree (BinNode a t1 t2) = RoseNode (show a) [ppBinTree t1, ppBinTree t2]
 type ExprTree = BinTree Op Int
 
 exprToExprTree :: Expr -> ExprTree
-exprToExprTree (Const x) = BinLeaf x
+exprToExprTree (Const x) = BinLeaf (Const x)
+exprToExpreTree (Variable x) = BinLeaf (Variable x)
 exprToExprTree (BinExpr op expr1 expr2) = BinNode op (exprToExprTree expr1) (exprToExprTree expr2)
 
 
