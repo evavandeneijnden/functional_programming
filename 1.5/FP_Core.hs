@@ -29,6 +29,7 @@ module FP_Core where
               deriving Show
 
   data Tick = Tick
+              deriving Show
 
   data Expr = Const Int                   -- for constants
             | Variable Int
@@ -41,10 +42,10 @@ module FP_Core where
     codeGen' :: se -> [Instr]
 
   instance CodeGen Expr where
-    codeGen' expr = instrGen expr ++ [EndProg]
+    codeGen' expr = instrGen expr
 
   instance CodeGen Statement where
-    codeGen' stat = instrGen' stat ++ [EndProg]
+    codeGen' stat = instrGen' stat
 
   -- ========================================================================
   -- Processor functions
@@ -70,23 +71,26 @@ module FP_Core where
 
           PushAddr n -> (pc+1, sp+1, heap, stack <~ (sp, (heap !! n)))
 
-          Store n -> (pc+1, sp-1, ys ++ [last stack] ++ zs, init stack)
-                  where
-                    (ys,zs) = splitAt n heap
+          Store n -> (pc+1, sp-1, heap <~ (n, (stack !! (sp-1))), init stack)
 
-          PushPC -> (pc+1, sp+1, heap, stack ++ [pc])
+          PushPC -> (pc+1, sp+1, heap, stack ++ [pc+1])
 
-          EndRep -> ((last stack), sp, heap, stack)
+          EndRep -> if ((stack !! (sp-2)) == 0) then (pc+1, sp, heap, init (init stack))
+                    else ((last stack), sp, heap, stack <~ ((sp-2), (stack !! (sp-2))-1))
 
           EndProg  -> (-1, sp, heap, stack)
+
+  compile :: Statement -> [Instr]
+  compile stat = codeGen' stat ++ [EndProg]
 
   instrGen :: Expr -> [Instr]
   instrGen (Const x) = [PushConst x]
   instrGen (Variable x) = [PushAddr x]
-  instrGen (BinExpr op expr1 expr2) = (instrGen expr1) ++ (instrGen expr2) ++ [Calc op]
+  instrGen (BinExpr op expr1 expr2) = (codeGen' expr1) ++ (codeGen' expr2) ++ [Calc op]
 
   instrGen' :: Statement -> [Instr]
-  instrGen' (Assign addr expr) = (instrGen expr) ++ [Store addr]
+  instrGen' (Assign addr expr) = (codeGen' expr) ++ [Store addr]
+  instrGen' (Repeat expr stats) = (codeGen' expr) ++ [PushPC] ++ (foldl (++) [] (map codeGen' stats)) ++ [EndRep]
 
   -- ========================== Tree stuff ==================================
 
@@ -123,8 +127,17 @@ module FP_Core where
                 (Const 12)
                 (Const 5))
 
-  stat = Assign 2
-              (Const 36)
+  stat = Repeat (Const 3)
+          [(Assign 2
+              (Const 36)),
+           (Assign 3
+              (Variable 2))
+          ]
+
+  -- Testing
+  clock      = repeat Tick
+  emptyHeap :: [Int]
+  emptyHeap = replicate 8 0
 
   -- -- The program that results in the value of the expression (1105):
   -- prog = [ PushConst 2
