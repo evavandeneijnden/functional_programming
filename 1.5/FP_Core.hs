@@ -75,7 +75,7 @@ module FP_Core where
 
           PushPC -> (pc+1, sp+1, heap, stack ++ [pc+1])
 
-          EndRep -> if ((stack !! (sp-2)) == 0) then (pc+1, sp, heap, init (init stack))
+          EndRep -> if ((stack !! (sp-2)) == 0) then (pc+1, (sp-2), heap, init (init stack))
                     else ((last stack), sp, heap, stack <~ ((sp-2), (stack !! (sp-2))-1))
 
           EndProg  -> (-1, sp, heap, stack)
@@ -90,7 +90,7 @@ module FP_Core where
 
   instrGen' :: Statement -> [Instr]
   instrGen' (Assign addr expr) = (codeGen' expr) ++ [Store addr]
-  instrGen' (Repeat expr stats) = (codeGen' expr) ++ [PushPC] ++ (foldl (++) [] (map codeGen' stats)) ++ [EndRep]
+  instrGen' (Repeat expr stats) = (codeGen' expr) ++ [PushPC] ++ (concat (map codeGen' stats)) ++ [EndRep]
 
   -- ========================== Tree stuff ==================================
 
