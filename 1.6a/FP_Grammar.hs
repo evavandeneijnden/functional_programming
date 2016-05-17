@@ -70,5 +70,3 @@ testTxt    = prpr parseTree0
 
 -- showTree + toRoseTree: for graphical representation in browser
 testGr     = showTree $ toRoseTree parseTree0
-
-

@@ -26,9 +26,16 @@ data Alphabet = Terminal String               -- Terminal symbol: WILL be includ
 
               | Expr                          -- Expression
               | Nmbr                          -- Number
+              | Var                           -- Variables
               | Op                            -- Operation symbol
               | Space                         -- Spaces
               | Bracket                       -- Brackets
+
+              | Stat                          -- Statement
+              | Ass                           -- Assignment
+              | Repeat                        -- Repeat
+              | Rep                           -- Star repeat
+              | EndRep                        -- End repeat
               deriving (Eq,Ord,Show,Generic,ToRoseTree)
 
 -- ===================================================================
@@ -87,7 +94,7 @@ toStrings tree = case tree of
                                                                     : [  (","++str'):strs' | (str':strs') <- strss ]
 
                                addEndBrack [strs]       = [ strs ++ ["]"] ]
-                               addEndBrack (strs:strss) = strs : addEndBrack strss 
+                               addEndBrack (strs:strss) = strs : addEndBrack strss
 
      PError tr rule nt str k -> [ "==========="
                                 , "Parse Error"
@@ -105,5 +112,3 @@ toStrings tree = case tree of
                                 ]
 
 prpr t  = putStr $ ('\n':) $ (++"\n") $ unlines $ toStrings t
-
-
