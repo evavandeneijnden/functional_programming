@@ -9,6 +9,7 @@ module FP_TypesEtc where
 
 import GHC.Generics
 import FPPrac.Trees
+import Data.Char
 
 -- ===================================================================
 -- Example Alphabet
@@ -34,8 +35,7 @@ data Alphabet = Terminal String               -- Terminal symbol: WILL be includ
               | Stat                          -- Statement
               | Ass                           -- Assignment
               | Repeat                        -- Repeat
-              | Rep                           -- Start repeat
-              | EndRep                        -- End repeat
+              | Key                           -- Keyword
               deriving (Eq,Ord,Show,Generic,ToRoseTree)
 
 -- ===================================================================
@@ -59,7 +59,10 @@ type Token   = (Alphabet,String,Int)  -- Alphabet: indicates the "syntactic cate
 
 
 
-data TokenType = Number Double | Text String | SpecialCharacter String
+data TokenType = Number Double
+                | Text String
+                | SpecialCharacter String
+    deriving (Show)
 
 data State = Start | State1 | State2 | Final | Final1 | Final2 | Final3 | Final4 | Error | RealError
   deriving (Show, Eq)
@@ -91,39 +94,41 @@ fsaSpecialCharacters character state = case state of
                                     | character == '-' -> Final1
                                     | (character == '>' || character == '<') -> Final4
                                     | (character == '=') -> Final4
+                                    | (character == '(') -> Final1
+                                    | (character == ')') -> Final1
                             Final1  -> Error
                             Final4  | character == '=' -> Final1
                                     | otherwise -> Error
 
-  charStrToToken :: String -> Token
-  charStrToToken str = SpecialCharacter str
+charStrToToken :: String -> TokenType
+charStrToToken str = SpecialCharacter str
 
 
-  numStrToToken :: String -> Token
-  numStrToToken i = Number (read i)
+numStrToToken :: String -> TokenType
+numStrToToken i = Number (read i)
 
 
-  identifierToToken :: String -> Token
-  identifierToToken str = Text str
+identifierToToken :: String -> TokenType
+identifierToToken str = Text str
 
 
 
 
 
-specialCharacters = ['*', '+', '-', '>', '<', '(', ')']
+specialCharacters = ['*', '+', '-', '>', '<', '(', ')', '=']
 
-chooseFsa :: Char -> (FSA, String -> Token)
+chooseFsa :: Char -> (FSA, String -> TokenType)
 chooseFsa x | (isDigit x)                 = (fsaNumbers, numStrToToken)
             | (isAlpha x)                 = (fsaIdentifiers, identifierToToken)
-            | (elem x speccialCharacters) = (fsaSpecialCharacters, charStrToToken)
-            | otherwise = error "Invalid input"
+            | (elem x specialCharacters) = (fsaSpecialCharacters, charStrToToken)
+            | otherwise = error ("Invalid input "++[x])
 
-addToken :: String -> State -> String -> (Char -> State -> State) -> (String, String)
-addToken [] _ partialToken _ = (partialToken,"")
-addToken (x:xs) currentState partialToken fsa
+addTokenType :: String -> State -> String -> (Char -> State -> State) -> (String, String)
+addTokenType [] _ partialToken _ = (partialToken,"")
+addTokenType (x:xs) currentState partialToken fsa
   | nextState == Error = (partialToken, (x:xs))
   | nextState == RealError = error "Parse error!"
-  | otherwise          = addToken xs nextState (partialToken ++ [x]) fsa
+  | otherwise          = addTokenType xs nextState (partialToken ++ [x]) fsa
     where
       nextState = fsa x currentState
 
@@ -134,16 +139,17 @@ replace toReplace replacement str  | (take lenRepl str) == toReplace = replaceme
                                    where
                                      lenRepl = length toReplace
 
-tokenizer':: String -> [Token]
+tokenizer':: String -> [TokenType]
 -- Removes whitespace from string before tokenizing it
 tokenizer' input = tokenizer (replace " " "" input)
 
-tokenizer :: String -> [Token]
+tokenizer :: String -> [TokenType]
 tokenizer [] = []
+tokenizer (' ':xs) = tokenizer xs
 tokenizer (x:xs)  = (toToken partialTokenStr) : (tokenizer rest)
                   where
                       (fsa, toToken) = chooseFsa x
-                      (partialTokenStr, rest) = addToken (x:xs) Start "" fsa
+                      (partialTokenStr, rest) = addTokenType (x:xs) Start "" fsa
 
 
 
