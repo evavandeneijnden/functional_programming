@@ -40,13 +40,25 @@ grrr nt = case nt of
 lBracket  = Symbol "("
 rBracket  = Symbol ")"
 
-ass       = Symbol "~"
-rep       = Symbol "{"
-endrep    = Symbol "}"
+ass       = Symbol "="
+rep       = Symbol "Repeat"
+endrep    = Symbol "EndRep"
 
 nmbr      = SyntCat Nmbr
 op        = SyntCat Op
 var       = SyntCat Var
+
+tupleizer :: [tokenType] -> Int -> [Token]
+tupleizer ((Number x):rest) i = (Nmbr,(show x),i) : (tupleizer rest i++)
+tupleizer ((Text x):rest) i
+                        | x == "Repeat" = (Rep,x,i) : (tupleizer rest i++)
+                        | x == "EndRep" = (EndRep,x,i) : (tupleizer rest i++)
+                        | otherwise = (Var,x,i) : (tupleizer rest i++)
+tupleizer ((SpecialCharacter x):rest) i
+                        | x elem [">",">=","<","<=","==","+","-","*"] = (Op,x,i) : (tupleizer rest i++)
+                        | x == "=" = (Ass,x,i) : (tupleizer rest i++)
+                        | x elem ["(",")"] = (Bracket,x,i) : (tupleizer rest i++)
+                        | otherwise = Error "Unknown special character sequence"
 
 tokenList0 = [  (Rep,"Repeat",1),
                 (Nmbr,"5",2),

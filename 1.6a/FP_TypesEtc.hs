@@ -34,7 +34,7 @@ data Alphabet = Terminal String               -- Terminal symbol: WILL be includ
               | Stat                          -- Statement
               | Ass                           -- Assignment
               | Repeat                        -- Repeat
-              | Rep                           -- Star repeat
+              | Rep                           -- Start repeat
               | EndRep                        -- End repeat
               deriving (Eq,Ord,Show,Generic,ToRoseTree)
 
