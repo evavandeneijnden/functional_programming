@@ -57,6 +57,98 @@ type Token   = (Alphabet,String,Int)  -- Alphabet: indicates the "syntactic cate
                                       -- Int: the position of the token in the input token-list
                                       --      (needed for error messages).
 
+
+
+data TokenType = Number Double | Text String | SpecialCharacter String
+
+data State = Start | State1 | State2 | Final | Final1 | Final2 | Final3 | Final4 | Error | RealError
+  deriving (Show, Eq)
+
+type FSA = Char -> State -> State
+
+fsaNumbers :: Char -> State -> State
+fsaNumbers character state = case state of
+                            Start  | (isDigit character) -> State1
+                            State1 | (isDigit character) -> State1
+                                   | character == '.' -> State2
+                                   | otherwise -> Error
+                            State2        | (isDigit character) -> Final
+                                          | otherwise ->RealError
+                            Final         | (isDigit character) -> Final
+                                          | otherwise -> Error
+
+fsaIdentifiers :: Char -> State -> State
+fsaIdentifiers character state = case state of
+                              Start | (isAlpha character) -> Final
+                                    | otherwise -> Error
+                              Final | (isAlphaNum character) -> Final
+                                    | otherwise -> Error
+
+fsaSpecialCharacters :: Char -> State -> State
+fsaSpecialCharacters character state = case state of
+                            Start   | character == '*' -> Final1
+                                    | character == '+' -> Final1
+                                    | character == '-' -> Final1
+                                    | (character == '>' || character == '<') -> Final4
+                                    | (character == '=') -> Final4
+                            Final1  -> Error
+                            Final4  | character == '=' -> Final1
+                                    | otherwise -> Error
+
+  charStrToToken :: String -> Token
+  charStrToToken str = SpecialCharacter str
+
+
+  numStrToToken :: String -> Token
+  numStrToToken i = Number (read i)
+
+
+  identifierToToken :: String -> Token
+  identifierToToken str = Text str
+
+
+
+
+
+specialCharacters = ['*', '+', '-', '>', '<', '(', ')']
+
+chooseFsa :: Char -> (FSA, String -> Token)
+chooseFsa x | (isDigit x)                 = (fsaNumbers, numStrToToken)
+            | (isAlpha x)                 = (fsaIdentifiers, identifierToToken)
+            | (elem x speccialCharacters) = (fsaSpecialCharacters, charStrToToken)
+            | otherwise = error "Invalid input"
+
+addToken :: String -> State -> String -> (Char -> State -> State) -> (String, String)
+addToken [] _ partialToken _ = (partialToken,"")
+addToken (x:xs) currentState partialToken fsa
+  | nextState == Error = (partialToken, (x:xs))
+  | nextState == RealError = error "Parse error!"
+  | otherwise          = addToken xs nextState (partialToken ++ [x]) fsa
+    where
+      nextState = fsa x currentState
+
+replace :: String -> String -> [Char] -> [Char]
+replace _ _ [] = []
+replace toReplace replacement str  | (take lenRepl str) == toReplace = replacement ++ (replace toReplace replacement (drop lenRepl str))
+                                   | otherwise = (take 1 str) ++ (replace toReplace replacement (drop 1 str))
+                                   where
+                                     lenRepl = length toReplace
+
+tokenizer':: String -> [Token]
+-- Removes whitespace from string before tokenizing it
+tokenizer' input = tokenizer (replace " " "" input)
+
+tokenizer :: String -> [Token]
+tokenizer [] = []
+tokenizer (x:xs)  = (toToken partialTokenStr) : (tokenizer rest)
+                  where
+                      (fsa, toToken) = chooseFsa x
+                      (partialTokenStr, rest) = addToken (x:xs) Start "" fsa
+
+
+
+
+
 instance ToRoseTree Token where
   toRoseTree t = RoseNode (show t) []
 
