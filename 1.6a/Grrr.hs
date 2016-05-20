@@ -80,6 +80,7 @@ data Opr    = Add | Mul | Sub
 data Ex     = Const Double                   -- for constants
           | Variable String
           | BinEx Opr Ex Ex        -- for ``binary expressions''
+          | IfEx Ex Ex Ex
         deriving (Eq,Ord,Show,Generic,ToRoseTree)
 
 data Statement = Assign String Ex
@@ -93,6 +94,7 @@ cleanTreeS (PNode Stat ((PNode Var var):exprList)) = Assign (cleanTreeL (head va
 cleanTreeE (PNode Expr ((PNode Expr expr1):op:rest)) = BinEx (cleanTreeO op) (cleanTreeE (PNode Expr expr1)) (cleanTreeE (head rest))
 cleanTreeE (PNode Expr ((PNode Nmbr nr):rest)) = Const (read (cleanTreeL (head nr)))
 cleanTreeE (PNode Expr ((PNode Var var):rest)) = Variable (cleanTreeL (head var))
+cleanTreeE (PNode Expr ((PLeaf _):rest)) = IfEx (cleanTreeE (head rest)) (cleanTreeE (rest !! 3)) (cleanTreeE (rest !! 5))
 
 cleanTreeO (PNode Op op)
                     | cleanTreeL (head op) == "*" = Mul
