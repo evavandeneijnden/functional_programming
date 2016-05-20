@@ -74,7 +74,7 @@ tupleizer ((SpecialCharacter x):rest) i
 --                 | PError ParseTree [Alphabet] Alphabet String Int
 --                 deriving (Eq,Show,Generic,ToRoseTree)
 
-data Opr    = Add | Mul | Sub
+data Opr    = Add | Mul | Sub | GRT | GRTE | SMT | SMTE | EQU
         deriving (Eq,Ord,Show,Generic,ToRoseTree)
 
 data Ex     = Const Double                   -- for constants
@@ -94,12 +94,18 @@ cleanTreeS (PNode Stat ((PNode Var var):exprList)) = Assign (cleanTreeL (head va
 cleanTreeE (PNode Expr ((PNode Expr expr1):op:rest)) = BinEx (cleanTreeO op) (cleanTreeE (PNode Expr expr1)) (cleanTreeE (head rest))
 cleanTreeE (PNode Expr ((PNode Nmbr nr):rest)) = Const (read (cleanTreeL (head nr)))
 cleanTreeE (PNode Expr ((PNode Var var):rest)) = Variable (cleanTreeL (head var))
-cleanTreeE (PNode Expr ((PLeaf _):rest)) = IfEx (cleanTreeE (head rest)) (cleanTreeE (rest !! 3)) (cleanTreeE (rest !! 5))
+cleanTreeE (PNode Expr ((PLeaf _):(PNode Expr expr1):(PLeaf _):(PNode Expr expr2):(PLeaf _):(PNode Expr expr3):rest)) = IfEx (cleanTreeE (PNode Expr expr1)) (cleanTreeE (PNode Expr expr2)) (cleanTreeE (PNode Expr expr3))
+cleanTreeE x = error $ show x
 
 cleanTreeO (PNode Op op)
                     | cleanTreeL (head op) == "*" = Mul
                     | cleanTreeL (head op) == "+" = Add
                     | cleanTreeL (head op) == "-" = Sub
+                    | cleanTreeL (head op) == ">" = GRT
+                    | cleanTreeL (head op) == ">=" = GRTE
+                    | cleanTreeL (head op) == "<" = SMT
+                    | cleanTreeL (head op) == "<=" = SMTE
+                    | cleanTreeL (head op) == "==" = EQU
 
 cleanTreeL (PLeaf (_,x,_)) = x
 
