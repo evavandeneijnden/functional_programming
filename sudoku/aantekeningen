@@ -1,0 +1,20 @@
+solve' matrix tries wrong
+
+solve' :: Sudoku -> [Int] -> Int -> Sudoku
+
+solve Sudoku
+
+solve' mySud [] -1
+
+search empty cell in mySud
+calculate options cell
+solve mySud [head options] -1
+
+solve Sudoku xs -1 -> bereken volgende
+
+solve Sudoku xs y -> search empty cell, calculate options, remove y from options, continue
+
+emptyCell Sudoku 0
+emptyCell Sudoku x
+
+calculate Cell
