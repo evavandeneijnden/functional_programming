@@ -2,6 +2,8 @@ module Front where
 
 import Prelude
 
+import Logic
+
 import Eventloop.Core
 import Eventloop.DefaultConfiguration
 import Eventloop.Types.Events
@@ -18,16 +20,19 @@ import Eventloop.Utility.Vectors
 canvasId :: C.CanvasId
 canvasId = 1
 
+-- data Cell = Cell {value :: Int, position :: (Int, Int), block :: Int} -- position = (rownum, colnum)
+        --   deriving (Show, Eq)
+
 cellShape :: Cell -> [Shape]
-cellShape cell = [Rectangle { position = (Point (256, 256))
+cellShape cell = [Rectangle { position = (Point ((50*fst(position cell)),(50*snd(position cell)))
 					   , dimensions = (50,50)
                        , fillColor = (0,0,0,0)
                        , strokeLineThickness = 1
                        , strokeColor = (0,0,0,1)
                        , rotationM = Nothing
                        },
-				   Text { position = (Point (280, 270))
-				   	   , text = "36"
+				   Text { position = (Point ((50*fst(position cell)+24),(50*snd(position cell)+14))
+				   	   , text = show (value cell)
 					   , fontFamily = "Arial"
 					   , fontSize = 30
 					   , alignment = AlignCenter
