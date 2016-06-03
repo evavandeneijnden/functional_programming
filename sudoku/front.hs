@@ -23,7 +23,7 @@ cellShape cell = [Rectangle { position = (Point (256, 256))
 					   , dimensions = (50,50)
                        , fillColor = (0,0,0,0)
                        , strokeLineThickness = 1
-                       , strokeColor = color
+                       , strokeColor = (0,0,0,1)
                        , rotationM = Nothing
                        },
 				   Text { position = (Point (280, 270))
@@ -31,7 +31,7 @@ cellShape cell = [Rectangle { position = (Point (256, 256))
 					   , fontFamily = "Arial"
 					   , fontSize = 30
 					   , alignment = AlignCenter
-                       , fillColor = color
+                       , fillColor = (0,0,0,1)
                        , strokeLineThickness = 1
                        , strokeColor = (0,0,0,0)
                        , rotationM = Nothing
