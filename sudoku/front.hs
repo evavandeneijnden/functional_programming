@@ -24,14 +24,14 @@ canvasId = 1
         --   deriving (Show, Eq)
 
 cellShape :: Cell -> [Shape]
-cellShape cell = [Rectangle { position = (Point ((50*fst(position cell)),(50*snd(position cell)))
+cellShape cell = [Rectangle { position = (Point (50*fst(coords cell)),(50*snd(coords cell)))
 					   , dimensions = (50,50)
                        , fillColor = (0,0,0,0)
                        , strokeLineThickness = 1
                        , strokeColor = (0,0,0,1)
                        , rotationM = Nothing
                        },
-				   Text { position = (Point ((50*fst(position cell)+24),(50*snd(position cell)+14))
+				   Text { position = (Point (50*fst(coords cell)+24),(50*snd(coords cell)+14))
 				   	   , text = show (value cell)
 					   , fontFamily = "Arial"
 					   , fontSize = 30
@@ -45,12 +45,12 @@ cellShape cell = [Rectangle { position = (Point ((50*fst(position cell)),(50*snd
 changeText :: FillColor -> [Out]
 changeText color
     = [ OutCanvas $ C.CanvasOperations canvasId [C.Clear C.ClearCanvas] -- Clear canvas completely
-      , OutBasicShapes $ DrawShapes canvasId txtShape -- Draw Text shape
+      , OutBasicShapes $ DrawShapes canvasId cell -- Draw Text shape
       ]
     where
-        txtShape = textShape color
+        cell = cellShape sudokuTest[0][0]
 
-
+sudokuTest = generateEmptySudoku 9
 
 
 config = defaultConfig { setupModuleConfigurations=[ C.setupCanvasModuleConfiguration
