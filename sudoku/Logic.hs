@@ -44,11 +44,11 @@ module Logic where
 
   generateEmptyRow' :: Int -> Int -> [Cell] -> [Cell]
   generateEmptyRow' 0  _ intermediate = intermediate
-  generateEmptyRow' rowwidth rownum intermediate = generateEmptyRow' (rowwidth-1) rownum  intermediate ++ [cell]
+  generateEmptyRow' rowwidth rownum intermediate = generateEmptyRow' (rowwidth-1) rownum  (intermediate ++ [cell])
                                                 where
                                                     cellcolumn = (length intermediate)
                                                     blocknum = (truncate (fromIntegral rownum / 3))*10 + (truncate (fromIntegral cellcolumn /3))
-                                                    cell = Cell{value = -1, coords = (rownum, cellcolumn), block = blocknum}
+                                                    cell = Cell{value = -1, coords = (rownum-1, cellcolumn), block = blocknum}
 
 
 

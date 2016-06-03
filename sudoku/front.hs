@@ -20,18 +20,18 @@ import Eventloop.Utility.Vectors
 canvasId :: C.CanvasId
 canvasId = 1
 
--- data Cell = Cell {value :: Int, position :: (Int, Int), block :: Int} -- position = (rownum, colnum)
+-- data Cell = Cell {value :: Int, coords :: (Int, Int), block :: Int} -- position = (rownum, colnum)
         --   deriving (Show, Eq)
 
 cellShape :: Cell -> [Shape]
-cellShape cell = [Rectangle { position = (Point (50*fst(coords cell)),(50*snd(coords cell)))
+cellShape cell = [Rectangle { position = (Point (fromIntegral (50*fst(coords cell)),fromIntegral (50*snd(coords cell)) ))
 					   , dimensions = (50,50)
                        , fillColor = (0,0,0,0)
                        , strokeLineThickness = 1
                        , strokeColor = (0,0,0,1)
                        , rotationM = Nothing
                        },
-				   Text { position = (Point (50*fst(coords cell)+24),(50*snd(coords cell)+14))
+				   Text { position = (Point (fromIntegral (50*fst(coords cell)+24),fromIntegral (50*snd(coords cell)+14) ))
 				   	   , text = show (value cell)
 					   , fontFamily = "Arial"
 					   , fontSize = 30
@@ -42,13 +42,21 @@ cellShape cell = [Rectangle { position = (Point (50*fst(coords cell)),(50*snd(co
                        , rotationM = Nothing
                        }]
 
+sudokuShape :: Sudoku -> [Shape]
+sudokuShape [] = []
+sudokuShape (r:rows) = (rowShape r) ++ (sudokuShape rows)
+
+rowShape :: [Cell] -> [Shape]
+rowShape [] = []
+rowShape (c:cells) = (cellShape c) ++ (rowShape cells)
+
 changeText :: FillColor -> [Out]
 changeText color
     = [ OutCanvas $ C.CanvasOperations canvasId [C.Clear C.ClearCanvas] -- Clear canvas completely
-      , OutBasicShapes $ DrawShapes canvasId cell -- Draw Text shape
+      , OutBasicShapes $ DrawShapes canvasId sudoku -- Draw Text shape
       ]
     where
-        cell = cellShape sudokuTest[0][0]
+        sudoku = sudokuShape sudokuTest
 
 sudokuTest = generateEmptySudoku 9
 
