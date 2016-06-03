@@ -15,8 +15,10 @@ module Logic where
                         complete_row = sudoku !! rownum
                         (ys, zs) = splitAt colnum complete_row
 
-  colPeers :: Cell -> Sudoku -> [Cell]
-  colPeers cell sudoku = colPeers' cell sudoku []
+
+
+  -- colPeers :: Cell -> Sudoku -> [Cell]
+  -- colPeers cell sudoku = colPeers' cell sudoku []
 
   -- colPeers' :: Cell -> Sudoku -> [Cell]
   -- colPeers' cell (row:rows) partial_result = colPeers'
