@@ -3,28 +3,30 @@ module Logic where
 
   type Sudoku = [[Cell]]
 
-  data Cell = Cell {value :: Int, position :: (Int, Int), block :: Int} -- position = (rownum, colnum)
+  data Cell = Cell {value :: Int, coords :: (Int, Int), block :: Int} -- coords = (rownum, colnum)
             deriving (Show, Eq)
 
 
   rowPeers :: Cell -> Sudoku -> [Cell]
   rowPeers cell sudoku = ys ++ (tail zs)
                       where
-                        rownum = fst (position cell)
-                        colnum = snd (position cell)
+                        rownum = fst (coords cell)
+                        colnum = snd (coords cell)
                         complete_row = sudoku !! rownum
                         (ys, zs) = splitAt colnum complete_row
 
+  colPeers :: Cell -> Sudoku -> [Cell]
+  colPeers cell sudoku = colPeers' rowNo colNo  sudoku []
+                            where
+                              (rowNo, colNo) = coords cell
 
+  colPeers' :: Int -> Int -> Sudoku -> [Cell] -> [Cell]
+  colPeers' _ _ [] partial_result = partial_result
+  colPeers' rowNo colNo (row:rows) partial_result | rowNo == currentRowNo = colPeers' rowNo colNo rows partial_result
+                                                  | otherwise = colPeers' rowNo colNo rows (partial_result ++ [row !! colNo])
+                                                  where
+                                                    currentRowNo =  fst (coords (head row))
 
-  -- colPeers :: Cell -> Sudoku -> [Cell]
-  -- colPeers cell sudoku = colPeers' cell sudoku []
-
-  -- colPeers' :: Cell -> Sudoku -> [Cell]
-  -- colPeers' cell (row:rows) partial_result = colPeers'
-
-  -- loopOverSudoku :: Sudoku -> (a -> Bool) -> [a] --takes a Sudoku and a function (that gives a bool), returns list os elems that evaluate to true
-  -- loopOverSudoku (row:rows) condition =
 
   generateEmptySudoku :: Int -> Sudoku
   generateEmptySudoku n = generateEmptySudoku' n  n []
@@ -46,7 +48,7 @@ module Logic where
                                                 where
                                                     cellcolumn = (length intermediate)
                                                     blocknum = (truncate (fromIntegral rownum / 3))*10 + (truncate (fromIntegral cellcolumn /3))
-                                                    cell = Cell{value = -1, position = (rownum, cellcolumn), block = blocknum}
+                                                    cell = Cell{value = -1, coords = (rownum, cellcolumn), block = blocknum}
 
 
 
