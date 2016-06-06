@@ -132,17 +132,6 @@ clickedCellInRow (c:cells) p
 						| round (x p) > (50*(snd (coords c)-1)) && round (x p) < (50*(snd (coords c)+1)) && round (y p) > (50*(fst (coords c)-1)) && round (y p) < (50*(fst (coords c)+1)) = Just c
 						| otherwise = clickedCellInRow cells p
 
--- Given a sudoku, a cell and an int, updates the given cell with the given int in the given sudoku and returns the new sudoku
-changeCellValue :: Sudoku -> Cell -> Int -> Sudoku
-changeCellValue [] _ _ = []
-changeCellValue (r:rows) cell value = (changeCellValueRow r cell value) : (changeCellValue rows cell value)
-
--- Given a list of cells, a cell and an int, updates the given cell with the given int in the given list of cells and returns the new list of cells
-changeCellValueRow :: [Cell] -> Cell -> Int -> [Cell]
-changeCellValueRow [] _ _ = []
-changeCellValueRow (c:cells) cell value
-									| (coords cell) == (coords c) = cell {value = value} : cells
-									| otherwise = c : (changeCellValueRow cells cell value)
 
 --------------------------------------------- Interfacing ---------------------------------------------
 
