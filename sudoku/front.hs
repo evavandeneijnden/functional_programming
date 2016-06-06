@@ -23,34 +23,24 @@ canvasId = 1
 
 ---------------------------------- Drawing sudoku's ----------------------------------------------------
 
--- data Cell = Cell {value :: Int, coords :: (Int, Int), block :: Int} -- coords = (rownum, colnum)
-        --   deriving (Show, Eq)
+-- Takes a cell and returns the shapes on a canvas to draw that cell.
 
 cellShape :: Cell -> [Shape]
-cellShape Cell {value = -1, coords = c} = [Rectangle { position = (Point (fromIntegral (50*snd(c)),fromIntegral (50*fst(c)) ))
+-- In case a cell is empty (value = 0), show an empty cell
+cellShape Cell {value = 0, coords = c} = [Rectangle { position = (Point (fromIntegral (50*snd(c)),fromIntegral (50*fst(c)) ))
 					   , dimensions = (50,50)
                        , fillColor = (0,0,0,0)
                        , strokeLineThickness = 1
                        , strokeColor = (0,0,0,1)
                        , rotationM = Nothing
-                       },
-				   Text { position = (Point (fromIntegral (50*snd(c)+24),fromIntegral (50*fst(c)+14) ))
-				   	   , text = ""
-					   , fontFamily = "Arial"
-					   , fontSize = 30
-					   , alignment = AlignCenter
-                       , fillColor = (0,0,0,1)
-                       , strokeLineThickness = 1
-                       , strokeColor = (0,0,0,0)
-                       , rotationM = Nothing
-                       }]
+                       }] -- Square box indicating the actual cell
 cellShape cell = [Rectangle { position = (Point (fromIntegral (50*snd(coords cell)),fromIntegral (50*fst(coords cell)) ))
 					   , dimensions = (50,50)
                        , fillColor = (0,0,0,0)
                        , strokeLineThickness = 1
                        , strokeColor = (0,0,0,1)
                        , rotationM = Nothing
-                       },
+                       }, -- Square box indicating the cell
 				   Text { position = (Point (fromIntegral (50*snd(coords cell)+24),fromIntegral (50*fst(coords cell)+14) ))
 				   	   , text = show (value cell)
 					   , fontFamily = "Arial"
@@ -60,26 +50,73 @@ cellShape cell = [Rectangle { position = (Point (fromIntegral (50*snd(coords cel
                        , strokeLineThickness = 1
                        , strokeColor = (0,0,0,0)
                        , rotationM = Nothing
-                       }]
+                       }] -- Text indicating the value of the cell
 
+-- Takes a sudoku and returns the shapes on a canvas to draw that sudoku.
 sudokuShape :: Sudoku -> [Shape]
 sudokuShape [] = []
 sudokuShape (r:rows) = (rowShape r) ++ (sudokuShape rows)
 
+-- Takes a list of cells (a row in the sudoku) and returns the shapes on a canvas to draw that list of cells.
 rowShape :: [Cell] -> [Shape]
 rowShape [] = []
 rowShape (c:cells) = (cellShape c) ++ (rowShape cells)
 
+-- Returns the shapes on a canvas to draw the solve-button
+solveShape :: [Shape]
+solveShape = [Rectangle { position = (Point (362, 462))
+				   , dimensions = (100,50)
+	               , fillColor = (0,0,0,0.36)
+	               , strokeLineThickness = 2
+	               , strokeColor = (0,0,0,1)
+	               , rotationM = Nothing
+	               },
+			   Text { position = (Point (362+46,462+14))
+			   	   , text = "Solve"
+				   , fontFamily = "Arial"
+				   , fontSize = 30
+				   , alignment = AlignCenter
+	               , fillColor = (0,0,0,1)
+	               , strokeLineThickness = 1
+	               , strokeColor = (0,0,0,0)
+	               , rotationM = Nothing
+	               }]
+
+-- Returns the shapes on a canvas to draw the help-section
+helpShape :: [Shape]
+helpShape = [Text { position = (Point (0,462+14))
+				, text = "Click a cell, then type a number to update that cell."
+				, fontFamily = "Arial"
+				, fontSize = 12
+				, alignment = AlignLeft
+				, fillColor = (0,0,0,1)
+				, strokeLineThickness = 1
+				, strokeColor = (0,0,0,0)
+				, rotationM = Nothing
+				},
+			Text { position = (Point (0,462+14+20))
+				, text = "Click the solve-button to solve the sudoku."
+				, fontFamily = "Arial"
+				, fontSize = 12
+				, alignment = AlignLeft
+				, fillColor = (0,0,0,1)
+				, strokeLineThickness = 1
+				, strokeColor = (0,0,0,0)
+				, rotationM = Nothing
+				}]
+-- Redraw the canvas with the sudoku and the solve-button
 redraw :: Sudoku -> [Out]
 redraw sudoku
     = [ OutCanvas $ C.CanvasOperations canvasId [C.Clear C.ClearCanvas] -- Clear canvas completely
-      , OutBasicShapes $ DrawShapes canvasId sudoku' -- Draw Text shape
+      , OutBasicShapes $ DrawShapes canvasId content -- Draw canvas again
       ]
     where
-        sudoku' = sudokuShape sudoku
+		content = solveShape ++ helpShape ++ sudoku'
+		sudoku' = sudokuShape sudoku
 
 --------------------------------------------- Utility functions ---------------------------------------
 
+-- Given a sudoku and a point, finds out which cell (if any) of the sudoku is located at the given point
 clickedCell :: Sudoku -> Point -> Maybe Cell
 clickedCell [] _ = Nothing
 clickedCell (r:rows) p
@@ -88,30 +125,41 @@ clickedCell (r:rows) p
 				where
 					foundMaybeCell = clickedCellInRow r p
 
+-- Given a list of cells and a point, finds out which cell (if any) of that list is located at the given point
 clickedCellInRow :: [Cell] -> Point -> Maybe Cell
 clickedCellInRow [] _ = Nothing
 clickedCellInRow (c:cells) p
 						| round (x p) > (50*(snd (coords c)-1)) && round (x p) < (50*(snd (coords c)+1)) && round (y p) > (50*(fst (coords c)-1)) && round (y p) < (50*(fst (coords c)+1)) = Just c
 						| otherwise = clickedCellInRow cells p
 
+-- Given a sudoku, a cell and an int, updates the given cell with the given int in the given sudoku and returns the new sudoku
 changeCellValue :: Sudoku -> Cell -> Int -> Sudoku
 changeCellValue [] _ _ = []
 changeCellValue (r:rows) cell value = (changeCellValueRow r cell value) : (changeCellValue rows cell value)
 
+-- Given a list of cells, a cell and an int, updates the given cell with the given int in the given list of cells and returns the new list of cells
 changeCellValueRow :: [Cell] -> Cell -> Int -> [Cell]
 changeCellValueRow [] _ _ = []
 changeCellValueRow (c:cells) cell value
-									| (coords cell) == (coords c) = Cell {value = value, coords = (coords c), block = (block c)} : cells
+									| (coords cell) == (coords c) = cell {value = value} : cells
 									| otherwise = c : (changeCellValueRow cells cell value)
+
 --------------------------------------------- Interfacing ---------------------------------------------
 
+-- Used to indicate that last selected cell in the ProgramState
 type LastSelectedCell = Maybe Cell
 
+-- The state of the interface, consisting of the sudoku and the last selected cell
 data ProgramState = ProgramState { sudoku :: Sudoku, selected :: LastSelectedCell }
 				  deriving (Eq, Show)
 
+-- Start state of the interface, an empty sudoku and no selected cell
 beginProgramState = ProgramState { sudoku = generateEmptySudoku 9, selected = Nothing }
 
+solve :: Sudoku -> Sudoku
+solve s = changeCellValue s (s !! 6 !! 6) 36
+
+-- Evaluated when the Start-event is fired: draws the canvas with the start sudoku
 eventloop :: ProgramState -> In -> (ProgramState, [Out])
 eventloop ps Start
     = (ps, setupCanvas:(sudokuOut))
@@ -119,22 +167,26 @@ eventloop ps Start
         setupCanvas = OutCanvas $ C.SetupCanvas canvasId 1 (512, 512) (C.CSSPosition C.CSSFromCenter (C.CSSPercentage 50, C.CSSPercentage 50))
         sudokuOut = redraw (sudoku ps)
 
+-- Evaluated when a Left-Mouse-Button is clicked. Used to select a cell or select the solve-button with the mouse
 eventloop ps (InMouse (Mouse MouseCanvas canvasId (Click MouseLeft) p))
-    = (ps', sudokuOut)
+	| (x p) > 362 && (x p) < 462 && (y p) > 462 && (y p) < 512 = (ps'2, redraw solvedSudoku)
+    | otherwise = (ps'1, redraw (sudoku ps))
     where
-		sudokuOut = redraw (sudoku ps)
-		ps' = ProgramState {sudoku = (sudoku ps), selected = selectedCell}
+		ps'1 = ProgramState {sudoku = (sudoku ps), selected = selectedCell}
 		selectedCell = clickedCell (sudoku ps) p
+		ps'2 = ProgramState {sudoku = solvedSudoku, selected = (selected ps)}
+		solvedSudoku = solve (sudoku ps)
 
+-- Evaluated when the letter s is pressed to stop the program
+eventloop ps (InKeyboard (Key "s")) = (ps, [Stop])
+
+-- Evaluated when a keypress is done. Used for number-inputs to update cell values
 eventloop ProgramState {sudoku = s, selected = Just cell} (InKeyboard (Key char))
     = (ps', sudokuOut)
     where
 		newSudoku = changeCellValue s cell (digitToInt $ char !! 0)
 		sudokuOut = redraw newSudoku
 		ps' = ProgramState {sudoku = newSudoku, selected = (Just cell)}
-
-eventloop ps (InKeyboard (Key "p")) = error (show (selected ps))
-eventloop ps (InKeyboard (Key "s")) = (ps, [Stop]) -- Stop the program when the letter 's' is pressed
 
 eventloop ps _ = (ps, []) -- Very important to avoid errors on In events that aren't handled but expected!
 
