@@ -132,7 +132,7 @@ t04 = Cell {value = 6, coords = (0,4), block = 01}
 t05 = Cell {value = 9, coords = (0,5), block = 01}
 t06 = Cell {value = 7, coords = (0,6), block = 02}
 t07 = Cell {value = 8, coords = (0,7), block = 02}
-t08 = Cell {value = 1, coords = (0,8), block = 02}
+t08 = Cell {value = 0, coords = (0,8), block = 02}
 r0 = [t00,t01,t02,t03,t04,t05,t06,t07,t08]
 
 t10 = Cell {value = 6, coords = (1,0), block = 00}
@@ -212,7 +212,7 @@ t77 = Cell {value = 3, coords = (7,7), block = 22}
 t78 = Cell {value = 6, coords = (7,8), block = 22}
 r7 = [t70,t71,t72,t73,t74,t75,t76,t77,t78]
 
-t80 = Cell {value = 7, coords = (8,0), block = 20}
+t80 = Cell {value = 0, coords = (8,0), block = 20}
 t81 = Cell {value = 6, coords = (8,1), block = 20}
 t82 = Cell {value = 3, coords = (8,2), block = 20}
 t83 = Cell {value = 4, coords = (8,3), block = 21}
@@ -220,7 +220,12 @@ t84 = Cell {value = 1, coords = (8,4), block = 21}
 t85 = Cell {value = 8, coords = (8,5), block = 21}
 t86 = Cell {value = 2, coords = (8,6), block = 22}
 t87 = Cell {value = 5, coords = (8,7), block = 22}
-t88 = Cell {value = 9, coords = (8,8), block = 22}
+t88 = Cell {value = 0, coords = (8,8), block = 22}
 r8 = [t80,t81,t82,t83,t84,t85,t86,t87,t88]
 
 testSudoku2 = [r0,r1,r2,r3,r4,r5,r6,r7,r8]
+
+
+valuePrint :: Sudoku -> [[Int]]
+valuePrint [] = []
+valuePrint (row:rows) = (map value row): valuePrint rows

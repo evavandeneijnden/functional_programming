@@ -122,6 +122,15 @@ module Logic where
                                     where
                                       nextEmpty = firstEmptyCell sudoku (length (x:xs))
 
+  applyFinalSolution :: Sudoku -> [Int] -> Sudoku -- List of ints is values for partial solution
+  applyFinalSolution sudoku [] = sudoku
+  applyFinalSolution sudoku (x:xs)  = case nextEmpty of
+                                      Just cell -> let
+                                        newSudoku = changeCellValue sudoku cell x
+                                        in applyFinalSolution newSudoku xs
+                                      Nothing -> error "Too many arguments applied to applyPartialSolution"       -- geen lege cellen meer over, sudoku is vol!
+                                    where
+                                      nextEmpty = firstEmptyCell sudoku 0
 
   solve :: Sudoku -> Sudoku
   solve sudoku = solve' sudoku [] Nothing
@@ -137,7 +146,7 @@ module Logic where
                                                                     where
                                                                       options = possibleValues cell (applyPartialSolution sudoku partialSolution)
                                                                       trimmedOptions = filter (/= (last partialSolution)) (possibleValues cell (applyPartialSolution sudoku (init partialSolution)))
-                                                        Nothing     -> (applyPartialSolution sudoku partialSolution)
+                                                        Nothing     -> (applyFinalSolution sudoku partialSolution)
                                                       where
                                                           nextEmpty = firstEmptyCell sudoku (length partialSolution)
                                                           -- init & lst commando's uitgevoerd op originele lijst of niet?
