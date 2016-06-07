@@ -197,7 +197,7 @@ testConfig = defaultConfig { setupModuleConfigurations=[ C.setupCanvasModuleConf
                                                        , setupKeyboardModuleConfiguration
                                                        ]}
                 where
-                    defaultConfig = allModulesEventloopSetupConfiguration beginProgramState eventloop
+                    defaultConfig = allModulesEventloopSetupConfiguration testProgramState eventloop
 
 
 -- Function used when user wants start the system with a blank Sudoku
