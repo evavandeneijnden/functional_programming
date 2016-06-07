@@ -145,8 +145,8 @@ data ProgramState = ProgramState { sudoku :: Sudoku, selected :: LastSelectedCel
 -- Start state of the interface, an empty sudoku and no selected cell
 beginProgramState = ProgramState { sudoku = generateEmptySudoku 9, selected = Nothing }
 
-solve :: Sudoku -> Sudoku
-solve s = changeCellValue s (s !! 6 !! 6) 36
+-- solve :: Sudoku -> Sudoku
+-- solve s = changeCellValue s (s !! 6 !! 6) 36
 
 -- Evaluated when the Start-event is fired: draws the canvas with the start sudoku
 eventloop :: ProgramState -> In -> (ProgramState, [Out])
