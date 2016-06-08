@@ -1,4 +1,4 @@
-module Tests where
+module TestSudoku1 where
   import Logic
 
   --------------------------- make a test sudoku ----------------------------------------
@@ -45,7 +45,7 @@ module Tests where
   t36 = Cell {value = 3, coords = (3,6), block = 12}
   t37 = Cell {value = 4, coords = (3,7), block = 12}
   t38 = Cell {value = 7, coords = (3,8), block = 12}
-  r3 = [t30,t31,t12,t33,t34,t35,t36,t37,t38]
+  r3 = [t30,t31,t32,t33,t34,t35,t36,t37,t38]
 
   t40 = Cell {value = 3, coords = (4,0), block = 10}
   t41 = Cell {value = 7, coords = (4,1), block = 10}
@@ -102,11 +102,5 @@ module Tests where
   t88 = Cell {value = 0, coords = (8,8), block = 22}
   r8 = [t80,t81,t82,t83,t84,t85,t86,t87,t88]
 
-  testSudoku = [r0,r1,r2,r3,r4,r5,r6,r7,r8]           -- This sudoku only has 6 open spaces.
+  testSudoku1 = [r0,r1,r2,r3,r4,r5,r6,r7,r8]           -- This sudoku only has 6 open spaces.
                                                       -- If more spaces are left over, it can take a long time for the sudoku to be solved.
-
-
-  -- Method that prints only the values of a sudoku, used for doing a quick TUI test
-  valuePrint :: Sudoku -> [[Int]]
-  valuePrint [] = []
-  valuePrint (row:rows) = (map value row): valuePrint rows

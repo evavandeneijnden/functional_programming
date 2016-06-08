@@ -4,7 +4,7 @@ import Prelude
 import Data.Char
 
 import Logic
-import Tests
+import TestSudoku1
 
 import Eventloop.Core
 import Eventloop.DefaultConfiguration
@@ -147,7 +147,7 @@ data ProgramState = ProgramState { sudoku :: Sudoku, selected :: LastSelectedCel
 beginProgramState = ProgramState { sudoku = generateEmptySudoku 9, selected = Nothing }
 
 -- Start state of the interface when using the provided testSudoku
-testProgramState = ProgramState {sudoku = testSudoku, selected = Nothing}
+testProgramState = ProgramState {sudoku = testSudoku1, selected = Nothing}
 
 -- Evaluated when the Start-event is fired: draws the canvas with the start sudoku
 eventloop :: ProgramState -> In -> (ProgramState, [Out])

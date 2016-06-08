@@ -68,8 +68,7 @@ module Logic where
   emptyCellRowHelper :: [Cell] -> Int -> (Maybe Cell, Int)
   emptyCellRowHelper (c:cells) 0                  | (value c) == 0 = (Just c, 0)
                                                   | otherwise = emptyCellRowHelper cells 0
-  emptyCellRowHelper [] 0                         = (Nothing, 0)
-  emptyCellRowHelper [] n                       = (Nothing, n)
+  emptyCellRowHelper [] n                         = (Nothing, n)
   emptyCellRowHelper (c:cells) noAlreadyFilledIn  | (value c) == 0 = emptyCellRowHelper cells (noAlreadyFilledIn-1)
                                                   | otherwise = emptyCellRowHelper cells noAlreadyFilledIn
 
@@ -140,17 +139,24 @@ module Logic where
   solve sudoku = solve' sudoku [] Nothing
 
   -- Helper function for the solve function. NOTE: Once again, not 'neat' Haskell due to lack of time
+  -- Tries to solve cell for cell
   solve' :: Sudoku -> [Int] -> Maybe [Int] -> Sudoku
   solve' sudoku partialSolution maybeOptionList  =  case nextEmpty of
                                                         Just cell   | (length options) == 0 -> solve' sudoku (init partialSolution) (Just trimmedOptions)     --backtracken!!!
                                                                     | otherwise -> case maybeOptionList of
-                                                                                      Just optionList | optionList == [] -> solve' sudoku (partialSolution ++ []) Nothing
+                                                                                      Just optionList | optionList == [] -> solve' sudoku partialSolution Nothing
                                                                                                       | otherwise -> solve' sudoku (partialSolution ++ [head optionList]) Nothing
-                                                                                      Nothing         | options == [] -> solve' sudoku (partialSolution ++ []) Nothing
+                                                                                      Nothing         | options == [] -> solve' sudoku partialSolution Nothing
                                                                                                       | otherwise -> solve' sudoku (partialSolution ++ [head options]) Nothing
                                                                     where
                                                                       options = possibleValues cell (applyPartialSolution sudoku partialSolution)
                                                                       trimmedOptions = filter (/= (last partialSolution)) (possibleValues cell (applyPartialSolution sudoku (init partialSolution)))
-                                                        Nothing     -> (applyFinalSolution sudoku partialSolution)
+                                                        Nothing     -> applyFinalSolution sudoku partialSolution
                                                       where
                                                           nextEmpty = firstEmptyCell sudoku (length partialSolution)
+
+
+  -- Method that prints only the values of a sudoku, used for doing a quick TUI test
+  valuePrint :: Sudoku -> [[Int]]
+  valuePrint [] = []
+  valuePrint (row:rows) = (map value row): valuePrint rows
