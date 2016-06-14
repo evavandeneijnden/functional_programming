@@ -4,6 +4,7 @@ import Prelude
 import Data.Char
 
 import Logic
+import TestSudoku1
 
 import Eventloop.Core
 import Eventloop.DefaultConfiguration
@@ -145,8 +146,8 @@ data ProgramState = ProgramState { sudoku :: Sudoku, selected :: LastSelectedCel
 -- Start state of the interface, an empty sudoku and no selected cell
 beginProgramState = ProgramState { sudoku = generateEmptySudoku 9, selected = Nothing }
 
-solve :: Sudoku -> Sudoku
-solve s = changeCellValue s (s !! 6 !! 6) 36
+-- Start state of the interface when using the provided testSudoku
+testProgramState = ProgramState {sudoku = testSudoku1, selected = Nothing}
 
 -- Evaluated when the Start-event is fired: draws the canvas with the start sudoku
 eventloop :: ProgramState -> In -> (ProgramState, [Out])
@@ -189,4 +190,18 @@ config = defaultConfig { setupModuleConfigurations=[ C.setupCanvasModuleConfigur
                 where
                     defaultConfig = allModulesEventloopSetupConfiguration beginProgramState eventloop
 
+-- Configuration used for the user that wants to run the provided test (matrix ca be found in Tests.hs)
+testConfig = defaultConfig { setupModuleConfigurations=[ C.setupCanvasModuleConfiguration
+                                                       , setupBasicShapesModuleConfiguration
+                                                       , setupMouseModuleConfiguration
+                                                       , setupKeyboardModuleConfiguration
+                                                       ]}
+                where
+                    defaultConfig = allModulesEventloopSetupConfiguration testProgramState eventloop
+
+
+-- Function used when user wants start the system with a blank Sudoku
 main = startEventloopSystem config
+
+-- Function used when user wants to start the system with the provided test Sudoku
+test = startEventloopSystem testConfig
