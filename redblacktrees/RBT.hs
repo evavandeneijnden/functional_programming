@@ -8,8 +8,7 @@ module RBT where
     data Colour = Red
                 | Black
                 | Grey
-
-    testRBT = (Node Black 6 (Node Red 5 (Leaf Black) (Leaf Black)) (Node Red 7 (Leaf Black) (Leaf Black)))
+            deriving Eq
 
     showRBT :: RBT -> RBTree
     showRBT (Node Red x t1 t2) = RBNode NodeRed (show x) [(showRBT t1), (showRBT t2)]
