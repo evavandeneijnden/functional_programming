@@ -182,10 +182,26 @@ fixed' _ = False
 balancedInsert :: RBT -> Int -> RBT
 balancedInsert tree value = fixRed (insert tree value)
 
+------------------------------------- Deletion ------------------------------------------
+
+leftmostValue :: RBT -> RBT
+-- Leaf, thus no left-children, thus itself
+leftmostValue (Leaf c) = Leaf c
+-- Node without a left child-node, thus itself
+leftmostValue (Node colour value (Leaf leafColour) rightChild) = Node colour value (Leaf leafColour) rightChild
+-- Any other node, thus left child
+leftmostValue (Node _ _ t1 _) = leftmostValue t1
+
 
  --- Testing ---
 testRBT = (Node Black 6 (Node Red 5 (Leaf Black) (Leaf Black)) (Node Red 7 (Leaf Black) (Leaf Black)))
 
-test = showRBTree   (showRBT
+test0 = showRBTree $ showRBT $ testRBT
+
+test1 = showRBTree   (showRBT
                         (balancedInsert (balancedInsert (balancedInsert testRBT 9) 36) 8)
+                    )
+
+test2 = showRBTree   (showRBT
+                        (leftmostValue testRBT)
                     )
