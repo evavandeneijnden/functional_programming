@@ -4,6 +4,7 @@ module RBT where
     -- Node Colour Value LeftSubTree RightSubTree
     data RBT    = Node Colour Int RBT RBT
                 | Leaf Colour
+            deriving Eq
 
     data Colour = Red
                 | Black

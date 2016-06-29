@@ -2,6 +2,8 @@ import Debug.Trace
 import FPPrac.Trees
 import RBT
 
+------------------------------------- Insertion ------------------------------------------
+
 insert :: RBT -> Int -> RBT
 insert (Node color value leftTree rightTree) new_value  | new_value < value = Node color value (insert leftTree new_value) rightTree
                                                         | otherwise = Node color value leftTree (insert rightTree new_value)
@@ -184,16 +186,38 @@ balancedInsert tree value = fixRed (insert tree value)
 
 ------------------------------------- Deletion ------------------------------------------
 
-leftmostValue :: RBT -> RBT
+leftmostValue :: RBT -> Int
 -- Leaf, thus no left-children, thus itself
-leftmostValue (Leaf c) = Leaf c
+leftmostValue (Leaf c) = error "Value not found in tree"
 -- Node without a left child-node, thus itself
-leftmostValue (Node colour value (Leaf leafColour) rightChild) = Node colour value (Leaf leafColour) rightChild
+leftmostValue (Node _ v (Leaf _) _) = v
 -- Any other node, thus left child
 leftmostValue (Node _ _ t1 _) = leftmostValue t1
 
+removeValue :: RBT -> Int -> RBT
+removeValue (Leaf c) = error "Value not found in tree"
+removeValue (Node c v leftsub rightsub) remove  | v == remove && replacement == (Leaf Grey) = fixGrey (Node c successor leftsub replacement)
+                                                | v == remove && replacement /= (Leaf Grey) = Node c successor leftsub replacement
+                                                | v < remove = Node c v (removeValue leftsub remove) rightsub
+                                                | v >= remove = Node c v leftsub (removeValue rightsub)
+                                            where
+                                                successor = leftmostValue rightsub
+                                                replacement = removeSmallest rightsub
 
- --- Testing ---
+removeSmallest :: RBT -> RBT
+-- case theta is red
+removeSmallest (Node Red v (Leaf _) rightsub) = rightsub
+-- case theta is black, right child is red
+removeSmallest (Node Black v (Leaf _) (Node Red v2 leftsub rightsub)) = (Node Black v2 leftsub rightsub)
+-- case theta is black with two leafs as children
+removeSmallest (Node Black v (Leaf _) (Leaf _)) = Leaf Grey
+-- find the smallest one
+removeSmallest (Node _ _ leftsub _) = removeSmallest leftsub
+
+
+
+ ------------------------------------- Testing ------------------------------------------
+
 testRBT = (Node Black 6 (Node Red 5 (Leaf Black) (Leaf Black)) (Node Red 7 (Leaf Black) (Leaf Black)))
 
 test0 = showRBTree $ showRBT $ testRBT
