@@ -194,6 +194,10 @@ leftmostValue (Node _ v (Leaf _) _) = v
 -- Any other node, thus left child
 leftmostValue (Node _ _ t1 _) = leftmostValue t1
 
+-- Synonym for removeValue
+delete :: RBT -> Int -> RBT
+delete tree value = removeValue tree value
+
 removeValue :: RBT -> Int -> RBT
 removeValue (Leaf c) remove = error "Value not found in tree"
 removeValue (Node c v leftsub rightsub) remove  | v == remove && replacement == (Leaf Grey) = fixGrey (Node c successor leftsub replacement)
