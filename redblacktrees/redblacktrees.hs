@@ -224,8 +224,8 @@ fixGrey (Node Black p g (Node colourS s l r))
                         tree = (Node Black p g (Node colourS s l r))
 fixGrey (Node Black p (Node colourS s l r) g) -- mirrored version of above patterns
                             | (colour g) == Grey && colourS == Black && (colour l) == Black && (colour r) == Black = fixCase1 tree
-                            | (colour g) == Grey && colourS == Black && (colour l) ==  Red = fixCase2 tree
-                            | (colour g) == Grey && colourS == Black && (colour r) == Red = fixCase4 tree -- Colour of l has to be black, or it would have mached above
+                            | (colour g) == Grey && colourS == Black && (colour r) ==  Red = fixCase2 tree
+                            | (colour g) == Grey && colourS == Black && (colour l) == Red = fixCase4 tree -- Colour of l has to be black, or it would have mached above
                             | (colour g) == Grey && colourS == Red = fixCase5 tree -- colours of l and r need to be black, otherwise the tree is too broken
                     where
                         tree = (Node Black p (Node colourS s l r) g)
@@ -235,8 +235,8 @@ fixGrey (Node Red p g (Node colourS s l r))
                     where
                         tree = (Node Red p g (Node colourS s l r))
 fixGrey (Node Red p (Node colourS s l r) g) -- mirrored version of above
-                            | (colour g) == Grey && (colour l) == Red = fixCase2 tree
-                            | (colour g) == Grey && (colour l) == Black = fixCase3 tree
+                            | (colour g) == Grey && (colour r) == Red = fixCase2 tree
+                            | (colour g) == Grey && (colour r) == Black = fixCase3 tree
                     where
                         tree = (Node Red p (Node colourS s l r) g)
 fixGrey tree = tree -- don't fix what ain't broken
@@ -244,30 +244,30 @@ fixGrey tree = tree -- don't fix what ain't broken
 fixCase1 :: RBT -> RBT
 fixCase1 (Node Black p (Node Grey g leftG rightG) (Node Black s l r)) = Node Grey p (Node Black g leftG rightG) (Node Red s l r)
 fixCase1 (Node Black p (Leaf Grey) (Node Black s l r)) = Node Grey p (Leaf Black) (Node Red s l r)
-fixCase1 (Node Black p (Node Black s l r) (Node Grey g leftG rightG)) = Node Grey p (Node Red s r l) (Node Black g leftG rightG)
-fixCase1 (Node Black p (Node Black s l r) (Leaf Grey)) = Node Grey p (Node Red s r l) (Leaf Black)
+fixCase1 (Node Black p (Node Black s l r) (Node Grey g leftG rightG)) = Node Grey p (Node Red s l r) (Node Black g leftG rightG)
+fixCase1 (Node Black p (Node Black s l r) (Leaf Grey)) = Node Grey p (Node Red s l r) (Leaf Black)
 
 fixCase2 :: RBT -> RBT
 fixCase2 (Node colourP p (Node Grey g leftG rightG) (Node Black s (Node Red l a b) r)) = Node colourP l (Node Black p (Node Black g leftG rightG) a) (Node Black s b r)
 fixCase2 (Node colourP p (Leaf Grey) (Node Black s (Node Red l a b) r)) = Node colourP l (Node Black p (Leaf Black) a) (Node Black s b r)
-fixCase2 (Node colourP p (Node Black s (Node Red l a b) r) (Node Grey g leftG rightG)) =  Node colourP l (Node Black s r b) (Node Black p a (Node Black g leftG rightG))
-fixCase2 (Node colourP p (Node Black s (Node Red l a b) r) (Leaf Grey)) =  Node colourP l (Node Black s r b) (Node Black p a (Leaf Black))
+fixCase2 (Node colourP p (Node Black s r (Node Red l a b)) (Node Grey g leftG rightG)) =  Node colourP l (Node Black s r a) (Node Black p b (Node Black g leftG rightG))
+fixCase2 (Node colourP p (Node Black s r (Node Red l a b)) (Leaf Grey)) =  Node colourP l (Node Black s r a) (Node Black p b (Leaf Black))
 
 fixCase3 :: RBT -> RBT
 fixCase3 (Node _ p (Node Grey g leftG rightG) (Node Black s l r)) = Node Black s (Node Red p (Node Black g leftG rightG) l) r
 fixCase3 (Node _ p (Leaf Grey) (Node Black s l r)) = Node Black s (Node Red p (Leaf Black) l) r
-fixCase3 (Node _ p (Node Black s l r) (Node Grey g leftG rightG)) = Node Black s r (Node Red p l (Node Black g leftG rightG))
-fixCase3 (Node _ p (Node Black s l r) (Leaf Grey)) = Node Black s r (Node Red p l (Leaf Black))
+fixCase3 (Node _ p (Node Black s l r) (Node Grey g leftG rightG)) = Node Black s l (Node Red p r (Node Black g leftG rightG))
+fixCase3 (Node _ p (Node Black s l r) (Leaf Grey)) = Node Black s l (Node Red p r (Leaf Black))
 
 fixCase4 :: RBT -> RBT
 fixCase4 (Node Black p (Node Grey g leftG rightG) (Node Black s l (Node Red r leftR rightR))) = Node Black s (Node Black p (Node Black g leftG rightG) l) (Node Black r leftR rightR)
 fixCase4 (Node Black p (Leaf Grey) (Node Black s l (Node Red r leftR rightR))) = Node Black s (Node Black p (Leaf Black) l) (Node Black r leftR rightR)
-fixCase4 (Node Black p (Node Black s l (Node Red r leftR rightR)) (Node Grey g leftG rightG)) = Node Black s (Node Black r leftR rightR) (Node Black p l (Node Black g leftG rightG))
-fixCase4 (Node Black p (Node Black s l (Node Red r leftR rightR)) (Leaf Grey)) = Node Black s (Node Black r leftR rightR) (Node Black p l (Leaf Black))
+fixCase4 (Node Black p (Node Black s (Node Red l leftL rightL) r) (Node Grey g leftG rightG)) = Node Black s (Node Black l leftL rightL) (Node Black p r (Node Black g leftG rightG))
+fixCase4 (Node Black p (Node Black s (Node Red l leftL rightL) r) (Leaf Grey)) = Node Black s (Node Black l leftL rightL) (Node Black p r (Leaf Black))
 
 fixCase5 :: RBT -> RBT
 fixCase5 (Node Black p g (Node Red s l r)) = Node Black s (Node Red p g l) r
-fixCase5 (Node Black p (Node Red s l r) g) = Node Black s r (fixGrey (Node Red p l g))
+fixCase5 (Node Black p (Node Red s l r) g) = Node Black s l (fixGrey (Node Red p r g))
 
 colour :: RBT -> Colour
 colour (Node c _ _ _ ) = c
@@ -291,9 +291,9 @@ test2 = showRBTree  (showRBT
 testRemoveSimple = showRBTree  (showRBT
                         (removeValue test2Tree 11)
                     )
-testGreyTree = removeValue test2Tree 15
+testGreyTree = removeValue test1Tree 9
 testRemoveGrey = showRBTree  (showRBT
                         (testGreyTree)
                     )
 
-testMultiple = showRBTreeList $ showRBTList [test2Tree, testGreyTree]
+testMultiple = showRBTreeList $ showRBTList [test1Tree, testGreyTree]
