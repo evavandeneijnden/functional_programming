@@ -195,11 +195,11 @@ leftmostValue (Node _ v (Leaf _) _) = v
 leftmostValue (Node _ _ t1 _) = leftmostValue t1
 
 removeValue :: RBT -> Int -> RBT
-removeValue (Leaf c) = error "Value not found in tree"
+removeValue (Leaf c) remove = error "Value not found in tree"
 removeValue (Node c v leftsub rightsub) remove  | v == remove && replacement == (Leaf Grey) = fixGrey (Node c successor leftsub replacement)
                                                 | v == remove && replacement /= (Leaf Grey) = Node c successor leftsub replacement
-                                                | v < remove = Node c v (removeValue leftsub remove) rightsub
-                                                | v >= remove = Node c v leftsub (removeValue rightsub)
+                                                | v < remove = Node c v leftsub (removeValue rightsub remove)
+                                                | v >= remove = Node c v (removeValue leftsub remove) rightsub
                                             where
                                                 successor = leftmostValue rightsub
                                                 replacement = removeSmallest rightsub
@@ -210,22 +210,90 @@ removeSmallest (Node Red v (Leaf _) rightsub) = rightsub
 -- case theta is black, right child is red
 removeSmallest (Node Black v (Leaf _) (Node Red v2 leftsub rightsub)) = (Node Black v2 leftsub rightsub)
 -- case theta is black with two leafs as children
-removeSmallest (Node Black v (Leaf _) (Leaf _)) = Leaf Grey
+removeSmallest (Node Black v (Leaf _) (Leaf _)) = trace "Inserting grey leaf" Leaf Grey
 -- find the smallest one
-removeSmallest (Node _ _ leftsub _) = removeSmallest leftsub
+removeSmallest (Node c v leftsub rightsub) = Node c v (fixGrey (removeSmallest leftsub)) rightsub
 
+fixGrey :: RBT -> RBT
+fixGrey (Node Black p g (Node colourS s l r))
+                            | (colour g) == Grey && colourS == Black && (colour l) == Black && (colour r) == Black = fixCase1 tree
+                            | (colour g) == Grey && colourS == Black && (colour l) ==  Red = fixCase2 tree
+                            | (colour g) == Grey && colourS == Black && (colour r) == Red = fixCase4 tree -- Colour of l has to be black, or it would have mached above
+                            | (colour g) == Grey && colourS == Red = fixCase5 tree -- colours of l and r need to be black, otherwise the tree is too broken
+                    where
+                        tree = (Node Black p g (Node colourS s l r))
+fixGrey (Node Black p (Node colourS s l r) g) -- mirrored version of above patterns
+                            | (colour g) == Grey && colourS == Black && (colour l) == Black && (colour r) == Black = fixCase1 tree
+                            | (colour g) == Grey && colourS == Black && (colour l) ==  Red = fixCase2 tree
+                            | (colour g) == Grey && colourS == Black && (colour r) == Red = fixCase4 tree -- Colour of l has to be black, or it would have mached above
+                            | (colour g) == Grey && colourS == Red = fixCase5 tree -- colours of l and r need to be black, otherwise the tree is too broken
+                    where
+                        tree = (Node Black p (Node colourS s l r) g)
+fixGrey (Node Red p g (Node colourS s l r))
+                            | (colour g) == Grey && (colour l) == Red = fixCase2 tree
+                            | (colour g) == Grey && (colour l) == Black = fixCase3 tree
+                    where
+                        tree = (Node Red p g (Node colourS s l r))
+fixGrey (Node Red p (Node colourS s l r) g) -- mirrored version of above
+                            | (colour g) == Grey && (colour l) == Red = fixCase2 tree
+                            | (colour g) == Grey && (colour l) == Black = fixCase3 tree
+                    where
+                        tree = (Node Red p (Node colourS s l r) g)
+fixGrey tree = tree -- don't fix what ain't broken
 
+fixCase1 :: RBT -> RBT
+fixCase1 (Node Black p (Node Grey g leftG rightG) (Node Black s l r)) = Node Grey p (Node Black g leftG rightG) (Node Red s l r)
+fixCase1 (Node Black p (Leaf Grey) (Node Black s l r)) = Node Grey p (Leaf Black) (Node Red s l r)
+fixCase1 (Node Black p (Node Black s l r) (Node Grey g leftG rightG)) = Node Grey p (Node Red s r l) (Node Black g leftG rightG)
+fixCase1 (Node Black p (Node Black s l r) (Leaf Grey)) = Node Grey p (Node Red s r l) (Leaf Black)
+
+fixCase2 :: RBT -> RBT
+fixCase2 (Node colourP p (Node Grey g leftG rightG) (Node Black s (Node Red l a b) r)) = Node colourP l (Node Black p (Node Black g leftG rightG) a) (Node Black s b r)
+fixCase2 (Node colourP p (Leaf Grey) (Node Black s (Node Red l a b) r)) = Node colourP l (Node Black p (Leaf Black) a) (Node Black s b r)
+fixCase2 (Node colourP p (Node Black s (Node Red l a b) r) (Node Grey g leftG rightG)) =  Node colourP l (Node Black s r b) (Node Black p a (Node Black g leftG rightG))
+fixCase2 (Node colourP p (Node Black s (Node Red l a b) r) (Leaf Grey)) =  Node colourP l (Node Black s r b) (Node Black p a (Leaf Black))
+
+fixCase3 :: RBT -> RBT
+fixCase3 (Node _ p (Node Grey g leftG rightG) (Node Black s l r)) = Node Black s (Node Red p (Node Black g leftG rightG) l) r
+fixCase3 (Node _ p (Leaf Grey) (Node Black s l r)) = Node Black s (Node Red p (Leaf Black) l) r
+fixCase3 (Node _ p (Node Black s l r) (Node Grey g leftG rightG)) = Node Black s r (Node Red p l (Node Black g leftG rightG))
+fixCase3 (Node _ p (Node Black s l r) (Leaf Grey)) = Node Black s r (Node Red p l (Leaf Black))
+
+fixCase4 :: RBT -> RBT
+fixCase4 (Node Black p (Node Grey g leftG rightG) (Node Black s l (Node Red r leftR rightR))) = Node Black s (Node Black p (Node Black g leftG rightG) l) (Node Black r leftR rightR)
+fixCase4 (Node Black p (Leaf Grey) (Node Black s l (Node Red r leftR rightR))) = Node Black s (Node Black p (Leaf Black) l) (Node Black r leftR rightR)
+fixCase4 (Node Black p (Node Black s l (Node Red r leftR rightR)) (Node Grey g leftG rightG)) = Node Black s (Node Black r leftR rightR) (Node Black p l (Node Black g leftG rightG))
+fixCase4 (Node Black p (Node Black s l (Node Red r leftR rightR)) (Leaf Grey)) = Node Black s (Node Black r leftR rightR) (Node Black p l (Leaf Black))
+
+fixCase5 :: RBT -> RBT
+fixCase5 (Node Black p g (Node Red s l r)) = Node Black s (Node Red p g l) r
+fixCase5 (Node Black p (Node Red s l r) g) = Node Black s r (fixGrey (Node Red p l g))
+
+colour :: RBT -> Colour
+colour (Node c _ _ _ ) = c
+colour (Leaf c) = c
 
  ------------------------------------- Testing ------------------------------------------
 
-testRBT = (Node Black 6 (Node Red 5 (Leaf Black) (Leaf Black)) (Node Red 7 (Leaf Black) (Leaf Black)))
+testRBT = (Node Black 9 (Node Red 7 (Leaf Black) (Leaf Black)) (Node Red 15 (Leaf Black) (Leaf Black)))
 
 test0 = showRBTree $ showRBT $ testRBT
 
+test1Tree = balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert testRBT 11) 10) 12) 20) 14) 3) 13) 8) 5) 16) 17
 test1 = showRBTree   (showRBT
-                        (balancedInsert (balancedInsert (balancedInsert testRBT 9) 36) 8)
+                        (test1Tree)
+                    )
+test2Tree = (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert (balancedInsert testRBT 11) 10) 12) 20) 14) 3)
+test2 = showRBTree  (showRBT
+                        (test2Tree)
                     )
 
-test2 = showRBTree   (showRBT
-                        (leftmostValue testRBT)
+testRemoveSimple = showRBTree  (showRBT
+                        (removeValue test2Tree 11)
                     )
+testGreyTree = removeValue test2Tree 15
+testRemoveGrey = showRBTree  (showRBT
+                        (testGreyTree)
+                    )
+
+testMultiple = showRBTreeList $ showRBTList [test2Tree, testGreyTree]

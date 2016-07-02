@@ -17,3 +17,6 @@ module RBT where
     showRBT (Node Grey x t1 t2) = RBNode NodeGrey (show x) [(showRBT t1), (showRBT t2)]
     showRBT (Leaf Red) = RBNode NodeRed "" []
     showRBT (Leaf Black) = RBNode NodeBlack "" []
+
+    showRBTList :: [RBT] -> [RBTree]
+    showRBTList trees = map showRBT trees
